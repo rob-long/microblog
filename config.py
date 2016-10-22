@@ -12,6 +12,23 @@ OPENID_PROVIDERS = [
     {'name': 'Flickr', 'url': 'http://www.flickr.com/<username>'},
     {'name': 'MyOpenID', 'url': 'https://www.myopenid.com'}]
 
+OAUTH_CREDENTIALS = {
+    'facebook': {
+        'id': '1799929536902054',
+        'secret': 'a77fe045a27f94e86f7ace6a9c700d90'
+    },
+    'twitter': {
+        'id': 't1LDf3NIDbtgd63ZxuCZpIXlP',
+        'secret': 'Y8q1OOP7Sxa5pz3C8S6PCW4SJh5zr5076LHtR5mmB9rnK6GJJL'
+    },
+    'google': {
+        'id': '517120583490-97qjpuhdg142tcs2l87srcnde1iea9l2.apps.googleusercontent.com',
+        'secret': 'KZMYkvCrDsohbQUamKO6JpKu'
+    }
+}
+
+
+
 if os.environ.get('DATABASE_URL') is None:
     SQLALCHEMY_DATABASE_URI = ('sqlite:///' + os.path.join(basedir, 'app.db') +
                                '?check_same_thread=False')
