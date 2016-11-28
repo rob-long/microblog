@@ -7,8 +7,8 @@ from flask.ext.babel import gettext
 from datetime import datetime
 from guess_language import guessLanguage
 from app import app, db, lm, oid, babel
-from .forms import LoginForm, EditForm, PostForm, SearchForm
-from .models import User, Post
+from .forms import LoginForm, EditForm, PostForm, JobForm, SearchForm
+from .models import User, Post, Job
 from .emails import follower_notification
 from .translate import microsoft_translate
 from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS, LANGUAGES, \
@@ -64,8 +64,33 @@ def internal_error(error):
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 @app.route('/index/<int:page>', methods=['GET', 'POST'])
-@login_required
 def index(page=1):
+    form = PostForm()
+    if form.validate_on_submit():
+        language = guessLanguage(form.post.data)
+        if language == 'UNKNOWN' or len(language) > 5:
+            language = ''
+        post = Post(body=form.post.data, timestamp=datetime.utcnow(),
+                    author=g.user, language=language)
+        db.session.add(post)
+        db.session.commit()
+        flash(gettext('Your post is now live!'))
+        return redirect(url_for('index'))
+    #jobs = g.user.followed_jobs().paginate(page, POSTS_PER_PAGE, False)
+    jobs = Job.query.order_by(Job.id).paginate(page, POSTS_PER_PAGE, False)
+    count = Job.query.count()
+    print count
+    return render_template('index.html',
+                           title='Home',
+                           form=form,
+                           jobs=jobs,
+                           count=count)
+
+
+@app.route('/post', methods=['GET', 'POST'])
+@app.route('/post/<int:page>', methods=['GET', 'POST'])
+@login_required
+def posts(page=1):
     form = PostForm()
     if form.validate_on_submit():
         language = guessLanguage(form.post.data)
@@ -82,7 +107,6 @@ def index(page=1):
                            title='Home',
                            form=form,
                            posts=posts)
-
 
 @app.route('/login', methods=['GET', 'POST'])
 @oid.loginhandler
@@ -144,6 +168,18 @@ def user(nickname, page=1):
                            user=user,
                            posts=posts)
 
+@app.route('/job/<id>')
+@app.route('/job/<id>/<int:page>')
+def job(id, page=1):
+    job = Job.query.get(id)    
+    if job is None:
+        flash(gettext('Job %(id) not found.', id=id))
+        return redirect(url_for('index'))
+    return render_template('job_detail.html',
+                           user=user,
+                           job=job)
+
+
 
 @app.route('/edit', methods=['GET', 'POST'])
 @login_required
@@ -161,6 +197,22 @@ def edit():
         form.about_me.data = g.user.about_me
     return render_template('edit.html', form=form)
 
+@app.route('/job/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_job(id):
+    job = Job.query.get(id)    
+    if job is None:
+        flash(gettext('Job %(id) not found.', id=id))
+        return redirect(url_for('index'))
+    else:
+        form = JobForm(obj=job)
+    if form.validate_on_submit():
+        form.populate_obj(job)
+        print job.description
+        db.session.commit()
+        flash(gettext('Your changes have been saved.'))
+        return redirect(url_for('index'))
+    return render_template('job_form.html', form=form)
 
 @app.route('/follow/<nickname>')
 @login_required
@@ -220,6 +272,23 @@ def delete(id):
     return redirect(url_for('index'))
 
 
+@app.route('/job/delete/<int:id>')
+@login_required
+def delete_job(id):
+    job = Job.query.get(id)
+    if job is None:
+        flash('Job not found.')
+        return redirect(url_for('index'))
+    if job.author.id != g.user.id:
+        flash('You cannot delete this job.')
+        return redirect(url_for('index'))
+    db.session.delete(job)
+    db.session.commit()
+    flash('Your job has been deleted.')
+    return redirect(url_for('index'))
+
+
+
 @app.route('/search', methods=['POST'])
 @login_required
 def search():
@@ -245,12 +314,6 @@ def translate():
             request.form['text'],
             request.form['sourceLang'],
             request.form['destLang'])})
-            
-            
-            
-            
-
-
 
 
 @app.route('/authorize/<provider>')
@@ -278,11 +341,41 @@ def oauth_callback(provider):
     login_user(user, True)
     return redirect(url_for('index'))
 
+@app.route('/google')
+def google():
+    return render_template('google_place.html')
+            
 
-
-            
-            
-            
+@app.route('/new', methods=['GET', 'POST'])
+@login_required
+def newjob():
+    form = JobForm()
+    language = guessLanguage(form.description.data)
+    if language == 'UNKNOWN' or len(language) > 5:
+        language = ''
+    job = Job(
+            title=form.title.data,
+            description=form.description.data,
+            city=form.city.data,
+            state=form.state.data,
+            preferences=form.preferences.data,
+            howtoapply=form.howtoapply.data,
+            timestamp=datetime.utcnow(),
+            author=g.user,
+            language=language)
+    print form.title.data
+    print form.description.data
+    if form.validate_on_submit():
+        db.session.add(job)
+        db.session.commit()
+        flash(gettext('Your post is now live!'))
+        return redirect(url_for('index'))
+    else:
+        form.populate_obj(job)
+    return render_template('job_form.html',
+                           title='New Job',
+                           form=form)            
+     
             
             
             

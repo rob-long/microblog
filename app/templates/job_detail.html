@@ -1,0 +1,31 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="job-detail">
+    <h2>{{job.title}}</h2>
+
+    <div class="job-thumbnail">
+        <a href="{{ url_for('user', nickname=job.author.nickname) }}"><img src="{{ job.author.avatar(70) }}" /></a>
+    </div>
+
+    <div class="job-organization">
+        {% autoescape false %}
+        {{ _('%(nickname)s said %(when)s:', nickname='<a href="%s">%s</a>' % (url_for('user', nickname=job.author.nickname), job.author.nickname), when=momentjs(job.timestamp).fromNow()) }}
+        {% endautoescape %}        
+    </div>
+
+    <div class="job-description">
+        {% autoescape false %}    
+            {{ job.description }}
+        {% endautoescape %}             
+    </div>
+
+    {% if job.author.id == g.user.id %}
+    <div><a href="{{ url_for('edit_job', id = job.id) }}">{{ _('Edit') }}</a></div>    
+    <div><a href="{{ url_for('delete_job', id = job.id) }}">{{ _('Delete') }}</a></div>
+    {% endif %}        
+</div>
+
+{% endblock %}

@@ -1,0 +1,151 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1>Post a Job</h1>
+    {% include 'flash.html' %}
+        
+    <p>This example is a quick exercise to illustrate how the default, static navbar and fixed to top navbar work. It includes the responsive CSS and HTML, so it also adapts to your viewport and device.</p>
+
+      {% from "_formhelpers.html" import render_field %}
+      <form method="post">
+        {{ form.hidden_tag() }}      
+
+        {{ render_field(form.title) }}
+
+        <div id="locationField" class="form-group row{% if form.city.errors %} has-error{% endif %}">
+          <label for="inputCity" class="col-sm-2 col-form-label">Location</label>
+          <div class="col-sm-10">
+            <input class="form-control" id="autocomplete" placeholder="Enter your address"
+             onFocus="geolocate()" type="text"></input>
+          </div>
+        </div>
+
+        {{ render_field(form.city) }}
+
+        {{ render_field(form.state) }}
+
+        <div class="form-group row{% if form.preferences.errors %} has-error{% endif %}">
+          <label class="col-sm-2">Remote</label>
+          <div class="col-sm-10">
+            <div class="form-check">
+              <label class="form-check-label">
+                {{form.preferences(class_="")}} Allow telecommuting
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        
+        <div class="form-group row{% if form.description.errors %} has-error{% endif %}">
+          <label for="inputDescription" class="col-sm-2">Job Description</label>
+          <div class="col-sm-10 form-trix">
+            {{form.description(id="inputDescription",class_="form-control hidden")}}            
+            <trix-editor class="{% if form.description.errors %} has-error{% endif %}" input="inputDescription"></trix-editor>
+            {% for error in form.description.errors %}
+              <span class="help-block">[{{ error }}]</span>
+            {% endfor %}                    
+          </div>
+        </div>    
+
+        <div class="form-group row">
+          <div class="offset-sm-2 col-sm-10">
+            <button type="submit" class="btn btn-primary">Preview Your Ad</button>
+          </div>
+        </div>
+      </form>
+
+    <script>
+      // This example displays an address form, using the autocomplete feature
+      // of the Google Places API to help users fill in the information.
+
+      // This example requires the Places library. Include the libraries=places
+      // parameter when you first load the API. For example:
+      // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
+
+      var placeSearch, autocomplete;
+      var componentForm = {
+        street_number: 'short_name',
+        route: 'long_name',
+        locality: 'long_name',
+        administrative_area_level_1: 'short_name',
+        country: 'long_name',
+        postal_code: 'short_name'
+      };
+
+      function initAutocomplete() {
+        // Create the autocomplete object, restricting the search to geographical
+        // location types.
+        autocomplete = new google.maps.places.Autocomplete(
+            /** @type {!HTMLInputElement} */(document.getElementById('autocomplete')),
+            //{types: ['(cities)']});
+            {types: ['geocode']});        
+
+        // When the user selects an address from the dropdown, populate the address
+        // fields in the form.
+        autocomplete.addListener('place_changed', fillInAddress);
+      }
+
+      function fillInAddress() {
+        // Get the place details from the autocomplete object.
+        var place = autocomplete.getPlace();
+        for (var component in componentForm) {
+          var c = document.getElementById(component);
+          if (c) {
+            c.value = '';
+            c.disabled = false;
+          }
+
+          $('#autocomplete').keydown(function (e) {
+            if (e.which == 13) return false;
+          });
+
+
+        }
+
+        // Get each component of the address from the place details
+        // and fill the corresponding field on the form.
+        for (var i = 0; i < place.address_components.length; i++) {
+          var addressType = place.address_components[i].types[0];
+          if (componentForm[addressType]) {
+            var val = place.address_components[i][componentForm[addressType]];
+            var c = document.getElementById(addressType);
+            if (c) {
+              c.value = val;
+              c.disabled = false;
+            }
+          }
+        }
+
+        var lat = place.geometry.location.lat();
+        var lon = place.geometry.location.lat();        
+        console.log(lat + ' ' + lon)
+
+      }
+
+      // Bias the autocomplete object to the user's geographical location,
+      // as supplied by the browser's 'navigator.geolocation' object.
+      function geolocate() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            var geolocation = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+            var circle = new google.maps.Circle({
+              center: geolocation,
+              radius: position.coords.accuracy
+            });
+            autocomplete.setBounds(circle.getBounds());
+          });
+        }
+      }
+    </script>
+
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMWFz4y4VILOTlv4dHv9JZ28Ntohhwf9E&libraries=places&callback=initAutocomplete"
+        async defer></script>
+
+
+{% endblock %}

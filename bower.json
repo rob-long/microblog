@@ -1,0 +1,18 @@
+{
+  "name": "job-board",
+  "homepage": "https://github.com/rob-long/myflask",
+  "authors": [
+    "Robert Long <roblong@gmail.com>"
+  ],
+  "description": "post jobs",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "./app/static/bower_components",
+    "test",
+    "tests"
+  ]
+}

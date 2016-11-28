@@ -1,20 +1,30 @@
 <!DOCTYPE html>
 <html>
-  <head>
+  <head lang="en">
     {% if title %}
     <title>{{ title }} - microblog</title>
     {% else %}
     <title>microblog</title>
     {% endif %}
-    <link href="{{ url_for('.static', filename='css/bootstrap.min.css') }}" rel="stylesheet" media="screen">
-    <link href="{{ url_for('.static', filename='css/bootstrap-responsive.min.css') }}" rel="stylesheet">
-    <script src="http://code.jquery.com/jquery-latest.js"></script>
-    <script src="{{ url_for('.static', filename='js/bootstrap.min.js') }}"></script>
+    
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="author" content="">    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    
+    <!-- styles -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bower_components/bootstrap/dist/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bower_components/trix/dist/trix.css') }}">    
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">    
+    
     <script src="{{ url_for('.static', filename='js/moment.min.js') }}"></script>
+    <script src="{{ url_for('.static', filename='js/custom.js') }}"></script>
+
     {% if g.locale != 'en' %}
     <script src="{{ url_for('.static', filename='js/moment-' + g.locale + '.min.js') }}"></script>
     {% endif %}
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
     <script>
     function translate(sourceLang, destLang, sourceId, destId, loadingId) {
         $(destId).hide();
@@ -34,36 +44,71 @@
         });
     }
     </script>
+    
+    
   </head>
   <body>
+
+
     <div class="container">
-      <div class="navbar">
-        <div class="navbar-inner">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
-          </a>
-          <a class="brand" href="{{ url_for('index') }}">microblog</a>
-            <ul class="nav">
-              <li><a href="{{ url_for('index') }}">{{ _('Home') }}</a></li>
-              {% if g.user.is_authenticated %}
-              <li><a href="{{ url_for('user', nickname=g.user.nickname) }}">{{ _('Your Profile') }}</a></li>
-              <li><a href="{{ url_for('logout') }}">{{ _('Logout') }}</a></li>
-              {% endif %}
-            </ul>
-          <div class="nav-collapse collapse">
-            {% if g.user.is_authenticated %}
-            <form class="navbar-search pull-right" action="{{ url_for('search') }}" method="post" name="search">{{ g.search_form.hidden_tag() }}{{ g.search_form.search(size=20, placeholder=_('Search'), class="search-query")}}</form>
-            {% endif %}
-          </div>
+          </button>
+          <a class="navbar-brand" href="/">Eternal Keggers</a>
         </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/">Home</a></li>
+                        <li><a href="/new">Post a Job</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                  {% if g.user.is_authenticated %}
+                  <li><a href="{{ url_for('user', nickname=g.user.nickname) }}">{{ _('Your Profile') }}</a></li>
+                  <li><a href="{{ url_for('logout') }}">{{ _('Logout') }}</a></li>
+                  {% endif %}                
+                
+                <li role="separator" class="divider"></li>
+                <li class="dropdown-header">Nav header</li>
+                <li><a href="#">Separated link</a></li>
+                <li><a href="#">One more separated link</a></li>
+              </ul>
+            </li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="../google">Google</a></li>
+            <li class="active"><a href="./">Fixed top <span class="sr-only">(current)</span></a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
       </div>
-      <div class="row">
-        <div class="span12">
-          {% block content %}{% endblock %}
-        </div>
-      </div>
-    </div>   
+    </nav>
+
+      <!-- Main component for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        {% block content %}{% endblock %}
+
+
+      </div> <!-- /jumbotron -->
+
+    </div> <!-- /container -->
+
+   
+    <!-- scripts -->
+    <!-- <script src="{{ url_for('static', filename='bower_components/react/react.min.js') }}"></script> -->
+    <!-- <script src="{{ url_for('static', filename='bower_components/react/react-dom.min.js') }}"></script> -->
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="{{ url_for('.static', filename='bower_components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='bower_components/trix/dist/trix.js') }}"></script>    
+    
+    
+    <!-- <script src="{{ url_for('static', filename='scripts/js/main.js') }}"></script> -->
   </body>
 </html>

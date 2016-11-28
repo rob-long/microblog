@@ -1,6 +1,6 @@
 from flask.ext.wtf import Form
 from flask.ext.babel import gettext
-from wtforms import StringField, BooleanField, TextAreaField
+from wtforms import StringField, BooleanField, TextAreaField, HiddenField
 from wtforms.validators import DataRequired, Length
 from .models import User
 
@@ -11,8 +11,8 @@ class LoginForm(Form):
 
 
 class EditForm(Form):
-    nickname = StringField('nickname', validators=[DataRequired()])
-    about_me = TextAreaField('about_me', validators=[Length(min=0, max=140)])
+    nickname = StringField('Nickname', validators=[DataRequired()])
+    about_me = TextAreaField('About Yourself', validators=[Length(min=0, max=240)])
 
     def __init__(self, original_nickname, *args, **kwargs):
         Form.__init__(self, *args, **kwargs)
@@ -40,6 +40,17 @@ class EditForm(Form):
 class PostForm(Form):
     post = StringField('post', validators=[DataRequired()])
 
+class JobForm(Form):
+    title = StringField('Job Title', validators=[DataRequired(),Length(min=0,max=200)], description="'Junior Web Designer' or 'Python Programmer'")
+    description = TextAreaField('Job Description', validators=[DataRequired()])
+    city = StringField('City', validators=[Length(min=0,max=100)], description="Denver", id="locality")
+    state = StringField('State', validators=[Length(min=0,max=100)], description="Colorado", id="administrative_area_level_1")
+    preferences = BooleanField('Remote', default=False)
+    howtoapply = StringField('howtoapply')
 
+ 
 class SearchForm(Form):
     search = StringField('search', validators=[DataRequired()])
+
+
+
